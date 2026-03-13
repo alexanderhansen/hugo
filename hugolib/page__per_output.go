@@ -297,6 +297,10 @@ func (pco *pageContentOutput) initRenderHooks() error {
 				}
 			case hooks.TableRendererType:
 				layoutDescriptor.Variant1 = "table"
+			case hooks.ListRendererType:
+				layoutDescriptor.Variant1 = "list"
+			case hooks.ListItemRendererType:
+				layoutDescriptor.Variant1 = "listitem"
 			case hooks.CodeBlockRendererType:
 				layoutDescriptor.Variant1 = "codeblock"
 				if id != nil {

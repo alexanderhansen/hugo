@@ -1709,6 +1709,14 @@ func (hr hookRendererTemplate) RenderTable(cctx context.Context, w hugio.FlexiWr
 	return hr.templateHandler.ExecuteWithContext(cctx, hr.templ, w, ctx)
 }
 
+func (hr hookRendererTemplate) RenderList(cctx context.Context, w hugio.FlexiWriter, ctx hooks.ListContext) error {
+	return hr.templateHandler.ExecuteWithContext(cctx, hr.templ, w, ctx)
+}
+
+func (hr hookRendererTemplate) RenderListItem(cctx context.Context, w hugio.FlexiWriter, ctx hooks.ListItemContext) error {
+	return hr.templateHandler.ExecuteWithContext(cctx, hr.templ, w, ctx)
+}
+
 func (hr hookRendererTemplate) ResolvePosition(ctx any) text.Position {
 	return hr.resolvePosition(ctx)
 }

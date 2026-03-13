@@ -13,6 +13,7 @@ When rendering Markdown to HTML, render hooks override the conversion. Each rend
 - [Headings](/render-hooks/headings)
 - [Images](/render-hooks/images)
 - [Links](/render-hooks/links)
+- [Lists and list items](/render-hooks/lists)
 - [Passthrough elements](/render-hooks/passthrough)
 - [Tables](/render-hooks/tables)
 
@@ -52,6 +53,8 @@ layouts/
       ├── render-codeblock.html
       ├── render-heading.html
       ├── render-image.html
+      ├── render-list.html
+      ├── render-listitem.html
       ├── render-link.html
       ├── render-passthrough.html
       └── render-table.html

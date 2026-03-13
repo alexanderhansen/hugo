@@ -25,6 +25,7 @@ import (
 	"github.com/gohugoio/hugo/markup/goldmark/images"
 	"github.com/gohugoio/hugo/markup/goldmark/internal/extensions/attributes"
 	"github.com/gohugoio/hugo/markup/goldmark/internal/render"
+	"github.com/gohugoio/hugo/markup/goldmark/lists"
 	"github.com/gohugoio/hugo/markup/goldmark/passthrough"
 	"github.com/gohugoio/hugo/markup/goldmark/tables"
 	"github.com/yuin/goldmark/util"
@@ -128,6 +129,7 @@ func newMarkdown(pcfg converter.ProviderConfig) goldmark.Markdown {
 			newLinks(cfg),
 			newTocExtension(tocRendererOptions),
 			blockquotes.New(),
+			lists.New(),
 		}
 		parserOptions []parser.Option
 	)

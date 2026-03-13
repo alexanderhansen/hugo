@@ -163,6 +163,42 @@ type PassthroughRenderer interface {
 	RenderPassthrough(cctx context.Context, w io.Writer, ctx PassthroughContext) error
 }
 
+// ListContext is the context passed to a render-list hook.
+type ListContext interface {
+	BaseContext
+	AttributesProvider
+
+	// The rendered (HTML) list items.
+	Text() hstring.HTML
+
+	// IsOrdered is true for ordered lists (<ol>), false for unordered (<ul>).
+	IsOrdered() bool
+}
+
+type ListRenderer interface {
+	RenderList(cctx context.Context, w hugio.FlexiWriter, ctx ListContext) error
+}
+
+// ListItemParentContext provides context about the parent list for a render-listitem hook.
+type ListItemParentContext interface {
+	IsOrdered() bool
+}
+
+// ListItemContext is the context passed to a render-listitem hook.
+type ListItemContext interface {
+	BaseContext
+
+	// The rendered (HTML) list item content.
+	Text() hstring.HTML
+
+	// Parent is the context of the parent list.
+	Parent() ListItemParentContext
+}
+
+type ListItemRenderer interface {
+	RenderListItem(cctx context.Context, w hugio.FlexiWriter, ctx ListItemContext) error
+}
+
 type IsDefaultCodeBlockRendererProvider interface {
 	IsDefaultCodeBlockRenderer() bool
 }
@@ -218,6 +254,8 @@ const (
 	PassthroughRendererType
 	BlockquoteRendererType
 	TableRendererType
+	ListRendererType
+	ListItemRendererType
 )
 
 type GetRendererFunc func(t RendererType, id any) any
