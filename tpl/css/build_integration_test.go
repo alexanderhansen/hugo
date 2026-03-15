@@ -17,8 +17,10 @@ import (
 	"strings"
 	"testing"
 
+	qt "github.com/frankban/quicktest"
 	"github.com/gohugoio/hugo/htesting"
 	"github.com/gohugoio/hugo/hugolib"
+	"github.com/gohugoio/hugo/internal/js/esbuild"
 )
 
 func TestCSSBuild(t *testing.T) {
@@ -165,30 +167,45 @@ span { background: green; }
 article { background: yellow; }
 -- layouts/home.html --
 {{ with resources.Get "css/main.css"  }}
-{{ $opts := (dict "minify" false "sourceMap" "SOURCE_MAP" "sourcesContent" SOURCES_CONTENT  "loaders" (dict ".png" "dataurl"))}}
+{{ $opts := (dict "minify" MINIFY "sourceMap" "SOURCE_MAP" "sourcesContent" SOURCES_CONTENT  "loaders" (dict ".png" "dataurl"))}}
 {{ with . | css.Build $opts  }}
  <link rel="stylesheet" href="{{ .RelPermalink }}" />
 {{ end }}
 {{ end }}
 	`
 
-	r := strings.NewReplacer(
-		"SOURCE_MAP", "linked",
-		"SOURCES_CONTENT", "true",
+	var (
+		r     *strings.Replacer
+		files string
+		b     *hugolib.IntegrationTestBuilder
 	)
 
-	files := r.Replace(filesTemplate)
+	for _, minify := range []string{"true", "false"} {
 
-	b := hugolib.Test(t, files, hugolib.TestOptOsFs())
-	b.AssertFileContent("public/css/main.css", "/*# sourceMappingURL=main.css.map */")
-	b.AssertFileContent("public/css/main.css.map",
-		`"sourcesContent":["p { background: red; }"`,
-		"AAAA;AAAI,cAAY;AAAK",
-	)
+		r = strings.NewReplacer(
+			"SOURCE_MAP", "linked",
+			"SOURCES_CONTENT", "true",
+			"MINIFY", minify,
+		)
+
+		files = r.Replace(filesTemplate)
+
+		b = hugolib.Test(t, files, hugolib.TestOptOsFs())
+		b.AssertFileContent("public/css/main.css", "/*# sourceMappingURL=main.css.map */")
+		b.AssertFileContent("public/css/main.css.map",
+			`"sourcesContent":["`,
+			`"mappings":"`,
+		)
+
+		sources := esbuild.SourcesFromSourceMap(b.FileContent("public/css/main.css.map"))
+		// main.css + foo.css + bar.css + baz.css = 4 sources.
+		b.Assert(len(sources), qt.Equals, 4)
+	}
 
 	r = strings.NewReplacer(
 		"SOURCE_MAP", "external",
 		"SOURCES_CONTENT", "true",
+		"MINIFY", "false",
 	)
 
 	files = r.Replace(filesTemplate)
@@ -203,6 +220,7 @@ article { background: yellow; }
 	r = strings.NewReplacer(
 		"SOURCE_MAP", "external",
 		"SOURCES_CONTENT", "false",
+		"MINIFY", "false",
 	)
 
 	files = r.Replace(filesTemplate)
@@ -216,6 +234,7 @@ article { background: yellow; }
 	r = strings.NewReplacer(
 		"SOURCE_MAP", "inline",
 		"SOURCES_CONTENT", "false",
+		"MINIFY", "false",
 	)
 
 	files = r.Replace(filesTemplate)
@@ -292,6 +311,32 @@ div {
 	b.AssertFileExists("public/css/pixel-NJRUOINY.png", true)
 	b.AssertFileContent("public/css/main.css", `url("./issue14619-NJRUOINY.png")`)
 	b.AssertFileExists("public/css/issue14619-NJRUOINY.png", true)
+}
+
+// Issue #14623
+func TestCSSBuildLoadersPartial(t *testing.T) {
+	t.Parallel()
+
+	files := `
+-- hugo.toml --
+disableKinds = ['page','rss','section','sitemap','taxonomy','term']
+-- layouts/home.html --
+{{ $opts := dict "loaders" (dict ".svg" "dataurl") }}
+{{ with resources.Get "css/main.css" | css.Build $opts }}
+  <link rel="stylesheet" href="{{ .RelPermalink }}">
+{{ end }}
+-- assets/css/main.css --
+body { background-image: url('images/pixel.png'); }
+div { background-image: url('images/foo.svg'); }
+-- assets/images/pixel.png --
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==
+-- assets/images/foo.svg --
+SVG file.
+`
+	b := hugolib.Test(t, files, hugolib.TestOptOsFs())
+	b.AssertFileExists("public/css/pixel-NJRUOINY.png", true)
+	b.AssertFileContent("public/css/main.css", `url(data:image/svg`) // svg should be inlined as dataurl.
+	b.AssertFileContent("public/css/main.css", `pixel-NJRUOINY.png`) // png should be referenced as a hashed file, not inlined.
 }
 
 func TestCSSBuildBootstrapFromNPM(t *testing.T) {
