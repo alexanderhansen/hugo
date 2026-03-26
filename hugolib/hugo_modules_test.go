@@ -51,13 +51,15 @@ path="a"
 [[module.imports.mounts]]
 source="myacontent"
 target="content/blog"
-lang="en"
+[module.imports.mounts.sites.matrix]
+languages  = "en"
 [[module.imports]]
 path="b"
 [[module.imports.mounts]]
 source="mybcontent"
 target="content/blog"
-lang="nn"
+[module.imports.mounts.sites.matrix]
+languages  = "nn"
 [[module.imports]]
 path="c"
 [[module.imports]]
@@ -86,7 +88,7 @@ title = "French Title"
 {{ range .Site.RegularPages }}
 |{{ .Title }}|{{ .RelPermalink }}|{{ .Plain }}
 {{ end }}
-{{ $data := .Site.Data }}
+{{ $data := hugo.Data }}
 Data Common: {{ $data.common.value }}
 Data C: {{ $data.c.value }}
 Data D: {{ $data.d.value }}
@@ -356,7 +358,7 @@ target = "data/extra"
 -- extra-data/test.yaml --
 message: Hugo Rocks
 -- layouts/home.html --
-{{ site.Data.extra.test.message }}
+{{ hugo.Data.extra.test.message }}
 `
 
 	b := Test(t, files)

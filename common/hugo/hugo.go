@@ -334,8 +334,13 @@ func deprecateLevel(item, alternative, version string, level logg.Level) {
 
 // DeprecateLevel informs about a deprecation logging at the given level.
 func deprecateLevelWithLogger(item, alternative, version string, level logg.Level, log logg.Logger) {
+	//if strings.Contains(item, "module.mounts.lang") || strings.Contains(item, "includeFiles") {
+	// hdebug.Panicf("Deprecated")
+	//}
 	var msg string
 	if level == logg.LevelError {
+		// Useful to debug deprecation errors that needs to be removedor fixed. Comment out when done debugging.
+		// hdebug.Panicf("deprecation error: %s was removed in Hugo %s. %s", item, version, alternative)
 		msg = fmt.Sprintf("%s was deprecated in Hugo %s and subsequently removed. %s", item, version, alternative)
 	} else {
 		msg = fmt.Sprintf("%s was deprecated in Hugo %s and will be removed in a future release. %s", item, version, alternative)

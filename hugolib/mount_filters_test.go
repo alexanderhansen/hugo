@@ -27,22 +27,22 @@ baseURL = "http://example.com/"
 [[module.mounts]]
 source = 'content'
 target = 'content'
-excludeFiles = "/a/c/**"
+files = "! /a/c/**"
 [[module.mounts]]
 source = 'static'
 target = 'static'
 [[module.mounts]]
 source = 'layouts'
 target = 'layouts'
-excludeFiles = "/**/foo.html"
+files = "! /**/foo.html"
 [[module.mounts]]
 source = 'data'
 target = 'data'
-includeFiles = "/mydata/**"
+files = "/mydata/**"
 [[module.mounts]]
 source = 'assets'
 target = 'assets'
-excludeFiles = ["/**exclude.*", "/moooo.*"]
+files = ["! /**exclude.*", "! /moooo.*"]
 [[module.mounts]]
 source = 'i18n'
 target = 'i18n'
@@ -72,7 +72,7 @@ foo
 -- assets/js/include.js --
 foo
 -- layouts/home.html --
-Data: {{ site.Data }}:END
+Data: {{ hugo.Data }}:END
 
 Template: {{ templates.Exists "partials/foo.html" }}:END
 Resource1: {{ resources.Get "js/include.js" }}:END
